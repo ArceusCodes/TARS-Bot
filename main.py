@@ -9,16 +9,26 @@ from discord.ext import commands
 dotenv.load_dotenv('token.env')
 token = str(os.getenv("TOKEN"))
 
-bot = discord.Bot()
+class Tars(discord.Bot):
+    def __init__(self):
+        super().__init__(
+            intents = discord.Intents.all(),
+            activity = discord.Activity(type=discord.ActivityType.listening, name="to some random server change it"),
+            status =discord.Status.idle
+        )
 
-@bot.event
-async def on_ready():
-    print(f"TARS is online.")
+
+    async def on_ready(self):
+        print(f"Logged in as {self.user} | Ping: {round(self.latency * 1000)}!")
+        print("--------------------------")
+
+
+bot = Tars()
 
 # Greet command:
 @bot.slash_command(name = 'greet', description = 'Say hello to TARS')
 async def hello(ctx):
-    await ctx.respond(f"Hi there.")
+    await ctx.respond(f"Hi there.", ephemeral = True)
 
 # Purge command:
 @bot.slash_command(name = 'purge', description = 'TARS will delete a selected number of messages in this channel')
@@ -27,10 +37,12 @@ async def hello(ctx):
 async def purge(ctx, messages: Option(int, description= "How many messages do you wish to delete?", required = True)):
     await ctx.defer()
     await ctx.channel.purge(limit = messages)
+
+
 @purge.error
 async def purgeerror(ctx, error):
     if isinstance(error, MissingPermissions):
-        await ctx.respond(':warning: You need `Manage Messages` permission in order to execute this command.')
+        await ctx.respond(':warning: You need `Manage Messages` permission in order to execute this command.', ephemeral = True)
     elif isinstance(error, commands.CommandOnCooldown):
         await ctx.respond(error)
     else:
@@ -39,7 +51,7 @@ async def purgeerror(ctx, error):
 # Ping command:
 @bot.command(description = "Sends the bot's latency")
 async def ping(ctx):
-    await ctx.respond(f":gear: Latency is {bot.latency * 1000} ms.")
+    await ctx.respond(f":gear: Latency is {bot.latency * 1000} ms.",ephemeral = True)
 
 # Ban command:
 @bot.slash_command(name = 'tarsban', description = 'TARS will ban a selected member from the server')
@@ -49,7 +61,7 @@ async def ban(ctx, member: Option(discord.Member, description = 'Select a user t
         await ctx.respond("Are you okay, little boy? As much as I'd like to do this, banning yourself would make you look more stupid than you already are. AND, I don't want to hurt you. :)")
     elif member.guild_permissions.administrator:
         await ctx.respond(":warning: You can't ban someone with `Administrator` permission.")
-    elif member.id == {bot.user}:
+    elif member.id == {bot.user.id}:
         await ctx.respond("Nice try but I won't fall for any of your tricks.")
     else:
         if reason == None:
@@ -103,6 +115,6 @@ async def gtn(ctx, guess: Option(int, description = 'Try to guess a number betwe
         await ctx.respond(f":white_check_mark: Congratulations! You guessed it.")
     else:
         await ctx.respond(f":warning: Incorrect guess, try again.", ephemeral = True)
-
+        
 
 bot.run(token)

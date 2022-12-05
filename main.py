@@ -6,6 +6,7 @@ import dotenv
 import random
 from discord.ext import commands
 from datetime import timedelta
+import time_str
 
 dotenv.load_dotenv('token.env')
 token = str(os.getenv("TOKEN"))
@@ -122,36 +123,25 @@ async def kickerror(ctx, error):
 # Timeout command:
 @bot.slash_command(name='tarstimeout', description='TARS will timeout a selected member for a specified time')
 @commands.has_permissions(moderate_members=True)
-async def timeout(ctx, member: Option(discord.Member, description='Select a user to TARS-timeout'),
-                  reason: Option(str, description='Any reason?', required=False),
-                  days: Option(int, default=0, required=False), hours: Option(int, default=0, required=False),
-                  minutes: Option(int, default=0, required=False), seconds: Option(int, default=0, required=False)):
+async def timeout(ctx, member: Option(discord.Member, description="Select a member to TARS-timeout"), 
+                duration: Option(str, description="Timeout duration?", required = True),
+                reason: Option(str, description="Any reason?")):
     if member.id == ctx.author.id:
         await ctx.respond("You can't timeout yourself. Instead, try shutting up.")
     elif member.guild_permissions.moderate_members or member.guild_permissions.administrator:
-        await ctx.respond(":warning: You can't timeout a moderator or someone with `Admisnitrator` permission.")
+        await ctx.respond(":warning: You can't timeout a moderator or someone with `Admisnitrator` permission.", ephemeral=True)
     elif member.id == {bot.user}:
         ctx.respond("Nice try but I won't fall for any of your tricks.")
-
-    if days == None:
-        days = 0
-    elif hours == None:
-        hours = 0
-    elif minutes == None:
-        minutes = 0
-    elif seconds == None:
-        seconds = 0
-    duration = timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds, )
+    time = time_str.IntervalConverter(duration)
     if reason == None:
-        await member.timeout_for(duration)
-        await ctx.send(
-            f":white_check_mark: Operation Successful, <@{member.id}> was timeout for {days} day(s), {hours} hour(s), {minutes} minute(s), and {seconds} second(s).\nReason: None\nAction taken by: <@{ctx.author.id}>")
+        await member.timeout(duration = time.timedelta_precise(), reason = f"Undefined. Action taken by {ctx.author.name}")
+        await ctx.respond(
+            f":white_check_mark: Operation Successful,<@{member.id}> was timed out for {duration}.\n Reason: Undefined\n Action taken by <@{ctx.author.id}> ")
     else:
-        await member.timeout_for(duration, reason=reason)
-        await ctx.send(
-            f":white_check_mark: Operation Successful, <@{member.id}> was timeout for {days} day(s), {hours} hour(s), {minutes} minute(s), and {seconds} second(s).\nReason: {reason}\nAction taken by: <@{ctx.author.id}>")
-
-
+        await member.timeout_for(duration, reason=f"{reason}. Action taken by {ctx.author.name}")
+        await ctx.respond(
+            f":white_check_mark: Operation Successful,<@{member.id}> was timed out for {duration}.\n Reason: {reason}\n Action taken by <@{ctx.author.id}> ")
+    await member.timeout(until=time.timedelta_precise, reason = reason)
 # Help command:
 @bot.slash_command(name='help', description="Lists all of TARS' protocols/commands")
 async def help(ctx):

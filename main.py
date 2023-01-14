@@ -226,13 +226,14 @@ async def timeouterror(ctx, error):
         raise error
 
 
-# Case command:
+# # Case command:
 # db = mysql.connector.connect(
 #     host="localhost",
 #     user="user",
 #     password="password",
 #     database="database"
 # )
+#
 # @bot.slash_command()
 # async def filecase(ctx: discord.ApplicationContext, member: discord.Member, reason: str):
 #     time = datetime.datetime.utcnow()
@@ -244,20 +245,19 @@ async def timeouterror(ctx, error):
 #     cursor.close()
 #     db.commit()
 #     embed = discord.Embed(
-#         description= ':white_check_mark: TARS has filed a case on the mentioned user.',
-#         color = discord.Colour.blurple()
+#         description=':white_check_mark: TARS has filed a case on the mentioned user.',
+#         color=discord.Colour.blurple()
 #     )
-#     await ctx.respond(embed = embed)
+#     await ctx.respond(embed=embed)
 
 
 # Lockdown command:
 @bot.slash_command(name='lock', description='TARS will lock the selected channel down for everyone')
 @commands.has_permissions(moderate_members=True)
-async def lock(ctx, channel: Option(discord.TextChannel)):
-    role = ctx.guild.get_role(1047454449674752000)
+async def lock(ctx, channel: Option(discord.TextChannel, description='Select a channel to lock down'), role: Option(discord.Role, description='Select a role to lock the selected channel for'), reason: Option(str, description='Any reason?', required=False)):
     await channel.set_permissions(target=role, send_messages=False)
     embed = discord.Embed(
-        description='<:tars_success:1055919701001252945> This channel has been locked.',
+        description=f'<:tars_success:1055919701001252945> This channel has been locked for {role}.\nReason: {reason}',
         color=discord.Colour.blurple()
     )
     await ctx.respond(embed=embed)
@@ -279,8 +279,7 @@ async def lockdownerror(ctx, error):
 # Unlock command:
 @bot.slash_command(name='unlock', description='TARS will unlock the selected text channel')
 @commands.has_permissions(moderate_members=True)
-async def unlock(ctx, channel: Option(discord.TextChannel)):
-    role = ctx.guild.get_role(1047454449674752000)
+async def unlock(ctx, channel: Option(discord.TextChannel), role: Option(discord.Role, description='Select a role to unlock the channel for')):
     await channel.set_permissions(target=role, send_messages=True)
     embed = discord.Embed(
         description='<:tars_success:1055919701001252945> Channel unlocked.',
@@ -388,7 +387,6 @@ async def gtn(ctx, guess: Option(int, description='Try to guess a number between
             color=discord.Colour.from_rgb(232, 17, 35)
         )
         await ctx.respond(embed=embed, ephemeral=True)
-
 
 
 bot.run(token)

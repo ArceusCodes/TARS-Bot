@@ -197,15 +197,16 @@ async def timeout(ctx, member: Option(discord.Member, description='Select a user
     elif member.id == {bot.user}:
         ctx.respond("Nice try but I won't fall for any of your tricks.")
 
-    duration = timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds, )
-    if reason == None:
-        reason = 'None.'
-    await member.timeout_for(duration, reason=reason)
-    embed = discord.Embed(
-        description=f"<:tars_success:1055919701001252945> Operation Successful, <@{member.id}> was timeout for {days} day(s), {hours} hour(s), {minutes} minute(s), and {seconds} second(s).\nReason: {reason}\nAction taken by: <@{ctx.author.id}>",
-        color=discord.Colour.blurple()
-    )
-    await ctx.send(embed=embed)
+    else:
+        duration = timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
+        if reason == None:
+            reason = 'None.'
+        await member.timeout_for(duration, reason=reason)
+        embed = discord.Embed(
+            description=f"<:tars_success:1055919701001252945> Operation Successful, <@{member.id}> was timeout for {days} day(s), {hours} hour(s), {minutes} minute(s), and {seconds} second(s).\nReason: {reason}\nAction taken by: <@{ctx.author.id}>",
+            color=discord.Colour.blurple()
+        )
+        await ctx.send(embed=embed)
 
 
 # Timeout error handling:

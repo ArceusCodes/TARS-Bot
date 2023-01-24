@@ -222,8 +222,8 @@ async def timeouterror(ctx, error):
             description='<:tars_question:1055912854743699597> Something went wrong, please re-run the command.',
             color=discord.Colour.from_rgb(232, 17, 35)
         )
-        await ctx.respond(embed=embed)
         raise error
+        await ctx.respond(embed=embed)
 
 
 # # Case command:

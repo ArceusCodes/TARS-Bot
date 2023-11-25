@@ -111,8 +111,6 @@ async def ban(ctx, member: Option(discord.Member, description='Select a user to 
             color=discord.Colour.from_rgb(232, 17, 35)
         )
         await ctx.respond(embed=embed)
-    elif member.id == {bot.user.id}:
-        await ctx.respond("Nice try but I won't fall for any of your tricks.")
     else:
         if reason == None:
             reason = f"No reason provided by {ctx.author}."
@@ -170,8 +168,6 @@ async def kick(ctx, member: Option(discord.Member, description='Select a user to
             color=discord.Colour.from_rgb(232, 17, 35)
         )
         await ctx.respond(embed=embed)
-    elif member.id == {bot.user}:
-        ctx.respond("Nice try but I won't fall for any of your tricks.")
     else:
         if reason == None:
             reason = f"No reason provided by {ctx.author}."
@@ -219,8 +215,6 @@ async def timeout(ctx, member: Option(discord.Member, description='Select a user
             color=discord.Colour.from_rgb(232, 17, 35)
         )
         await ctx.respond(embed=embed)
-    elif member.id == {bot.user}:
-        ctx.respond("Nice try but I won't fall for any of your tricks.")
     else:
         duration = timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
         if reason == None:
@@ -371,7 +365,6 @@ async def help(ctx):
     view.add_item(selectmenu)
     await ctx.respond("Select the specific type of commands you're looking for below:",
                       view=view)
-
 
 
 # Guess-the-Number command:

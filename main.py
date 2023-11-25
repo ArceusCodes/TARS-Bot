@@ -78,7 +78,8 @@ async def ping(ctx):
 password = str(os.getenv("DB"))
 db = sql.connect(host="localhost", user="Arceus", password=password, database="cases")
 
-@bot.slash_command()
+@bot.slash_command(name='file-case', description='TARS will log said user into the server watchlist.')
+@commands.has_permissions(moderate_members=True)
 async def filecase(ctx: discord.ApplicationContext, member: discord.Member, reason: str):
     time = str(datetime.datetime.utcnow())
     cursor = db.cursor()

@@ -1,10 +1,12 @@
 import discord
+import mysql.connector as sql
 from discord import Option
 from discord.ext.commands.errors import MissingPermissions
 import os
 import dotenv
 import random
 from discord.ext import commands
+import datetime
 from datetime import timedelta
 from discord.ui import Select, View
 
@@ -70,6 +72,28 @@ async def ping(ctx):
         color=discord.Colour.blurple()
     )
     await ctx.respond(embed=embed, ephemeral=True)
+
+
+# Case command:
+password = str(os.getenv("DB"))
+db = sql.connect(host="localhost", user="Arceus", password=password, database="cases")
+
+@bot.slash_command()
+async def filecase(ctx: discord.ApplicationContext, member: discord.Member, reason: str):
+    time = str(datetime.datetime.utcnow())
+    cursor = db.cursor()
+    cursor.execute(
+        "INSERT INTO all_cases VALUES (%s, %s, %s, %s)",
+        (member.id, ctx.author.id, reason, time)
+    )
+    cursor.close()
+    db.commit()
+    embed = discord.Embed(
+        description='<:tars_success:1055919701001252945> TARS has filed a case on the mentioned user.',
+        color=discord.Colour.blurple()
+    )
+    await ctx.respond(embed=embed)
+
 
 
 # Ban command:
@@ -193,10 +217,9 @@ async def timeout(ctx, member: Option(discord.Member, description='Select a user
             description="<:tars_error:1055912274835034194> You can't timeout a moderator or someone with `Administrator` permission.",
             color=discord.Colour.from_rgb(232, 17, 35)
         )
-        ctx.respond(embed=embed)
+        await ctx.respond(embed=embed)
     elif member.id == {bot.user}:
         ctx.respond("Nice try but I won't fall for any of your tricks.")
-
     else:
         duration = timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
         if reason == None:
@@ -223,39 +246,15 @@ async def timeouterror(ctx, error):
             description='<:tars_question:1055912854743699597> Something went wrong, please re-run the command.',
             color=discord.Colour.from_rgb(232, 17, 35)
         )
-        raise error
         await ctx.respond(embed=embed)
-
-
-# # Case command:
-# db = mysql.connector.connect(
-#     host="localhost",
-#     user="user",
-#     password="password",
-#     database="database"
-# )
-#
-# @bot.slash_command()
-# async def filecase(ctx: discord.ApplicationContext, member: discord.Member, reason: str):
-#     time = datetime.datetime.utcnow()
-#     cursor = db.cursor()
-#     cursor.execute(
-#         "INSERT INTO cases (member_id, moderator_id, reason, time) VALUES (%s, %s, %s, %s)",
-#         (member.id, ctx.message.author.id, reason, time)
-#     )
-#     cursor.close()
-#     db.commit()
-#     embed = discord.Embed(
-#         description=':white_check_mark: TARS has filed a case on the mentioned user.',
-#         color=discord.Colour.blurple()
-#     )
-#     await ctx.respond(embed=embed)
-
+        raise error
 
 # Lockdown command:
 @bot.slash_command(name='lock', description='TARS will lock the selected channel down for everyone')
 @commands.has_permissions(moderate_members=True)
-async def lock(ctx, channel: Option(discord.TextChannel, description='Select a channel to lock down'), role: Option(discord.Role, description='Select a role to lock the selected channel for'), reason: Option(str, description='Any reason?', required=False)):
+async def lock(ctx, channel: Option(discord.TextChannel, description='Select a channel to lock down'),
+               role: Option(discord.Role, description='Select a role to lock the selected channel for'),
+               reason: Option(str, description='Any reason?', required=False)):
     await channel.set_permissions(target=role, send_messages=False)
     embed = discord.Embed(
         description=f'<:tars_success:1055919701001252945> This channel has been locked for {role}.\nReason: {reason}',
@@ -280,7 +279,8 @@ async def lockdownerror(ctx, error):
 # Unlock command:
 @bot.slash_command(name='unlock', description='TARS will unlock the selected text channel')
 @commands.has_permissions(moderate_members=True)
-async def unlock(ctx, channel: Option(discord.TextChannel), role: Option(discord.Role, description='Select a role to unlock the channel for')):
+async def unlock(ctx, channel: Option(discord.TextChannel),
+                 role: Option(discord.Role, description='Select a role to unlock the channel for')):
     await channel.set_permissions(target=role, send_messages=True)
     embed = discord.Embed(
         description='<:tars_success:1055919701001252945> Channel unlocked.',
@@ -332,7 +332,7 @@ async def help(ctx):
             embed.add_field(name='<:dot:1056245841070915714> `/lock`',
                             value='TARS will lock a selected text channel for everyone. This will remove `Send_Messages` permission from everyone for that text channel.',
                             inline=False)
-            embed.add_field(name='<:dot: 1056245841070915714 > ` /unlock`',
+            embed.add_field(name='<:dot:1056245841070915714> ` /unlock`',
                             value='TARS will unlock a selected channel for everyone and they will be allowed to send messages.')
             embed.add_field(name='<:dot:1056245841070915714> `/tarskick`:',
                             value='TARS will kick a selected user from the server for a given reason (reason is optional).',
@@ -370,6 +370,7 @@ async def help(ctx):
     view.add_item(selectmenu)
     await ctx.respond("Select the specific type of commands you're looking for below:",
                       view=view)
+
 
 
 # Guess-the-Number command:

@@ -96,7 +96,6 @@ async def filecase(ctx: discord.ApplicationContext, member: discord.Member, reas
     await ctx.respond(embed=embed)
 
 
-
 # Ban command:
 @bot.slash_command(name='tarsban', description='TARS will ban a selected member from the server')
 @commands.has_permissions(ban_members=True)
@@ -243,6 +242,7 @@ async def timeouterror(ctx, error):
         )
         await ctx.respond(embed=embed)
         raise error
+
 
 # Lockdown command:
 @bot.slash_command(name='lock', description='TARS will lock the selected channel down for everyone')

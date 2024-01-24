@@ -96,6 +96,25 @@ async def filecase(ctx: discord.ApplicationContext, member: discord.Member, reas
     await ctx.respond(embed=embed)
 
 
+# Check cases command:
+@bot.slash_command(name='check-cases', description='TARS will fetch all cases on mentioned user.')
+@commands.has_permissions(moderate_members=True)
+async def checkcases(ctx: discord.ApplicationContext, member: discord.Member):
+    cursor = db.cursor()
+    member_id = [member.id]
+    cursor.execute(
+        "SELECT reason, moderator_id, time FROM all_cases WHERE member_id=%s LIMIT 10",
+        member_id
+    )
+    data = cursor.fetchall()
+    cases = '\n\n'.join([f"{k}. **Reason:** {row[0]}, **Mod ID:** {row[1]}, **Date/Time:** {row[2]}" for k, row in enumerate(data, start=1)])
+    embed = discord.Embed(
+        description=f'Cases on mentioned user: \n\n{cases}',
+        color=discord.Color.blurple()
+    )
+    await ctx.respond(embed=embed)
+
+
 # Ban command:
 @bot.slash_command(name='tarsban', description='TARS will ban a selected member from the server')
 @commands.has_permissions(ban_members=True)
